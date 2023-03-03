@@ -22,32 +22,34 @@ class Board
   
   def show_board 
     cont = 0
-    #@square.each {|sq| p sq.coordenate.x}
-    print cont
-    print " "
-    @square.each do |sq|        
-      if cont == 8 
-        print "\n" 
-        print sq.coordenate.y
-        print " "
-        cont = 0
-      end
-      if cont < 8
-        print sq.piece.name
-        print " "
-        cont += 1
+    buf = Hash.new("")
+    #@square.each {|sq| p sq.coordenate.x}  
+    @square.each {|sq|
+      #print sq.coordenate.y
+      #puts sq.piece.name
+      p buf[sq.coordenate.y]
+      
+      buf[sq.coordenate.y].concat(sq.piece.name)
+       
+      
+      #buf[sq.coordenate.y].concat(sq.piece.name)
+      #buf[sq.coordenate.y].concat(" ")   
+    }
+    p buf
+    buf = []
+  end
+
+  def change_piece(coordenate, new_piece)  
+    @square.each do |sq|
+      if sq.coordenate.to_arr == coordenate.to_arr
+        sq.piece = new_piece
+        return sq
       end
     end
-    print "\n "
-    8.times {|n| print " #{n}"}
-    print "\n"
   end
-end
 
-def change_piece(coordenate)  
+end #end of Board class
   
-end
-
 class Square
   attr_accessor :coordenate, :piece     
   def initialize(coordenate,content)
@@ -78,4 +80,6 @@ class Piece
 end      
 
 board_new = Board.new
+board_new.show_board
+board_new.change_piece(Coordenate.new(0,0),Piece.new("P"))
 board_new.show_board
