@@ -48,15 +48,6 @@ class Board
     print "\n"
   end
 
-  def change_piece(x,y,new_piece)
-    @allsq.each do |sq|
-      if sq.x == x && sq.y == y 
-        sq.content = new_piece
-        return sq
-      end
-    end
-  end
-
   def starting_order
     change_piece(0,0, @allpieces.id('t1','w'))
     change_piece(1,0, @allpieces.id('n1','w'))
@@ -93,12 +84,15 @@ class Board
     change_piece(7,6, @allpieces.id('p8','b'))
   end
 
-  #def return_square_by_coord(x,y)
-   # arr = @allsq.select { |sq| sq.x == x && sq.y == y }
-   # p arr[0]
-   # return arr[0]
- # end
-
+  
+ def change_piece(x,y,new_piece)
+  @allsq.each do |sq|
+    if sq.x == x && sq.y == y 
+      sq.content = new_piece
+      return sq
+    end
+  end
+end
  
 end
 # end of Board class
@@ -174,20 +168,90 @@ class SetOfPieces
 end      
 
 class Pieces
-  attr_accessor :name, :team, :eated, :label
-
+  attr_accessor :name, :team, :eated, :label, :legalmoves
+  
   def initialize(name, team = nil)
     @name = name
     @team = team
     @eated = false
     @label = name[0].capitalize
+    set_legal_moves
   end
 
+  def set_legal_moves
+    case @label
+    when 'T'
+      @legalmoves = [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],
+      [0,-1],[0,-2],[0,-3],[0,4],[0,-5],[0,-6],[0,-7],
+      [1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],
+      [-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0]]
+    when 'B'
+      @legalmoves = [[1,1],[2,2],[3,3],[4,4],[5,5],[5,5],[6,6],[7,7],
+      [-1,1],[-2,2],[-3,3],[-4,4],[-5,5],[-5,5],[-6,6],[-7,7],
+      [1,-1],[2,-2],[3,-3],[4,-4],[5,-5],[5,-5],[6,-6],[7,-7],
+      [-1,-1],[-2,-2],[-3,-3],[-4,-4],[-5,-5],[-5,-5],[-6,-6],[-7,-7]]
+    when 'N'
+      @legalmoves = [[2,1],[2,-1],[-2,1],[-2,-1],
+      [1,2],[-1,2],[1,-2],[-1,-2]]
+    when 'Q'
+      @legalmoves = [[0,1],[0,2],[0,3],[0,4],[0,5],[0,6],[0,7],
+      [0,-1],[0,-2],[0,-3],[0,4],[0,-5],[0,-6],[0,-7],
+      [1,0],[2,0],[3,0],[4,0],[5,0],[6,0],[7,0],
+      [-1,0],[-2,0],[-3,0],[-4,0],[-5,0],[-6,0],[-7,0],
+      [1,1],[2,2],[3,3],[4,4],[5,5],[5,5],[6,6],[7,7],
+      [-1,1],[-2,2],[-3,3],[-4,4],[-5,5],[-5,5],[-6,6],[-7,7],
+      [1,-1],[2,-2],[3,-3],[4,-4],[5,-5],[5,-5],[6,-6],[7,-7],
+      [-1,-1],[-2,-2],[-3,-3],[-4,-4],[-5,-5],[-5,-5],[-6,-6],[-7,-7]]
+    when 'K'
+      @legalmoves = [[0,1],[0,-1],[1,0],[-1,0],[1,1],[-1,1],[1,-1],[-1,1]]
+    when 'P'      
+      @legalmoves = [[0,1],[1,1],[-1,1]] if @team == 'w'
+      @legalmoves = [[0,-1],[1,-1],[-1,-1]] if @team == 'b'
+    end
+  end
+end
 
+class Player
+  attr_accessor :name,:color
+  def initialize(name,color)
+    @name=name
+    @color=color
+  end  
+end
+
+class Matchup()
+  attr_accessor :playerW,:playerB,:board
+  def initialize(name1,name2)
+    playerW = name1
+    playerB = name2
+    board = Board.new
+  end
+
+  def start
+  legalmove = false
+    while ! legalmove
+      move = ask_move(playerW)
+      legalmove = is_move_valid?(move)
+    end
+  end
+
+  def ask_move(player)
+    board.show_board
+    puts "Player #{player}, please chose your move."
+    return gets
+  end
+
+  def is_move_valid?(move)
+    
+    
+  end
 end
 
 
-board_new = Board.new
-board_new.show_board
-board_new.change_piece(0,0, board_new.allpieces.id('p1','w'))
-board_new.show_board
+current_match = Matchup.new('Mathis','Otro')
+current_match.start
+current_match.board_new.show_board
+
+
+
+
