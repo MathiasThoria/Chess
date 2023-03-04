@@ -105,7 +105,7 @@ class Square
     @y = y
     @content = content
   end
-  
+
 
 end
 
@@ -155,7 +155,7 @@ class SetOfPieces
   end
 
   def id(name, team = nil)
-    arr = @id.select{ |id| id.name == name && id.team == team } 
+    arr = @id.select{ |id| id.name == name && id.color == team } 
     return arr[0]
   end
 
@@ -168,11 +168,11 @@ class SetOfPieces
 end      
 
 class Pieces
-  attr_accessor :name, :team, :eated, :label, :legalmoves
+  attr_accessor :name, :color, :eated, :label, :legalmoves
   
   def initialize(name, team = nil)
     @name = name
-    @team = team
+    @color = team
     @eated = false
     @label = name[0].capitalize
     set_legal_moves
@@ -219,38 +219,89 @@ class Player
   end  
 end
 
-class Matchup()
+class Matchup
   attr_accessor :playerW,:playerB,:board
   def initialize(name1,name2)
-    playerW = name1
-    playerB = name2
-    board = Board.new
+    @playerW = name1
+    @playerB = name2
+    @board = Board.new
   end
 
   def start
   legalmove = false
-    while ! legalmove
-      move = ask_move(playerW)
-      legalmove = is_move_valid?(move)
-    end
+
+  while ! legalmove
+    puts 'while'
+    move = ask_move(playerW)
+    legalmove = is_move_valid?(move,'w')
+    legalmove = true
+  end
   end
 
   def ask_move(player)
     board.show_board
     puts "Player #{player}, please chose your move."
-    return gets
+    move = gets.chomp
+    return move
   end
 
-  def is_move_valid?(move)
+  def is_move_valid?(move,turn)    
+    piecetomove = move[0]
+    piecerank = letter_to_x(move[1]).to_i
+    piecey = move[2].to_i - 1
+    coordx = letter_to_x(move[4]).to_i
+    coordy = move[4].to_i - 1
+    
+    return false unless coordx >= 0 && coordx <= 8 
+    return false unless coordy >= 0 && coordy <= 8 
+    
+    piecetomove = piecetomove.capitalize
     
     
+    #search origin piece
+    sq_arr = board.allsq.select {|sq| sq.content.label == piecetomove && sq.x == letter_to_x(piecerank) && sq.content.color == turn && sq.y == piecey }       
+    if sq_arr.nil? 
+      puts "Pieza origen no encontrada."
+      return false
+    else
+      sq_origin = sq_arr[0]
+    end
+    
+    
+
+  end
+end
+
+def letter_to_x(letter)
+  letter = letter.capitalize unless letter.is_a? Integer
+  case letter
+    when 'A'
+      return 0  
+    when 'B'
+      return 1
+    when 'C'
+      return 2  
+    when 'D'
+      return 3
+    when 'E'
+      return 4
+    when 'F'
+      return 5
+    when 'G'
+      return 6
+    when 'H'
+      return 7
+    else 
+      return letter
   end
 end
 
 
+puts 'Init board'
 current_match = Matchup.new('Mathis','Otro')
+puts 'Starting Match.'
 current_match.start
-current_match.board_new.show_board
+current_match.board.show_board
 
 
 
