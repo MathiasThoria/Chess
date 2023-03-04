@@ -249,7 +249,7 @@ class Matchup
     piecetomove = move[0]
     piecerank = letter_to_x(move[1]).to_i
     piecey = move[2].to_i - 1
-    coordx = letter_to_x(move[4]).to_i
+    coordx = letter_to_x(move[3]).to_i
     coordy = move[4].to_i - 1
     
     return false unless coordx >= 0 && coordx <= 8 
@@ -258,17 +258,52 @@ class Matchup
     piecetomove = piecetomove.capitalize
     
     
-    #search origin piece
-    sq_arr = board.allsq.select {|sq| sq.content.label == piecetomove && sq.x == letter_to_x(piecerank) && sq.content.color == turn && sq.y == piecey }       
+    #search origin sq by piece
+    sq_arr = board.allsq.select { |sq| sq.x == letter_to_x(piecerank) && sq.y == piecey && sq.content.label == piecetomove }
     if sq_arr.nil? 
-      puts "Pieza origen no encontrada."
+      puts 'Pieza origen no encontrada.'
       return false
     else
       sq_origin = sq_arr[0]
     end
     
-    
+    sq_arr = nil
+    # search destiny sq
+    sq_arr = board.allsq.select { |sq| sq.x ==coordx  && sq.y == coordy }
+    if sq_arr.nil? 
+      puts 'Destino no valido'
+      return false
+    else
+      sq_destiny = sq_arr[0]
+    end
 
+    # destiny ocuppied?
+
+    # destiny in range?    
+    puts "In range > #{sq_origin.content.legalmoves.include?([sq_destiny.x,sq_destiny.y])}"
+
+    # colision?
+    # there are 3 types of movement: 
+    # horizontal -> y constant
+    # vertical -> x constant
+    # diagonal -> absolutes x = y
+    # so...
+
+    # identify movement
+    if sq_origin.x == sq_destiny.x
+      puts 'vertical'
+    
+    elsif sq_origin.y == sq_destiny.y
+      puts 'horizontal'
+    elsif sq_origin.x.abs == sq_origin.y.abs && sq_destiny.x.abs == sq_destiny.y.abs
+      puts 'diagonal'
+    else
+      puts 'error on direction'
+    end
+
+    
+    p sq_origin
+    p sq_destiny
   end
 end
 
