@@ -269,7 +269,7 @@ class Matchup
     
     sq_arr = nil
     # search destiny sq
-    sq_arr = board.allsq.select { |sq| sq.x ==coordx  && sq.y == coordy }
+    sq_arr = board.allsq.select { |sq| sq.x == coordx  && sq.y == coordy }
     if sq_arr.nil? 
       puts 'Destino no valido'
       return false
@@ -290,18 +290,24 @@ class Matchup
     # so...
 
     # identify movement
-    if sq_origin.x == sq_destiny.x
+    if sq_origin.x == sq_destiny.x 
       puts 'vertical'
-    
+      
     elsif sq_origin.y == sq_destiny.y
       puts 'horizontal'
+
     elsif sq_origin.x.abs == sq_origin.y.abs && sq_destiny.x.abs == sq_destiny.y.abs
       puts 'diagonal'
+
     else
       puts 'error on direction'
-    end
 
+    end
     
+    
+    
+    
+
     p sq_origin
     p sq_destiny
   end
