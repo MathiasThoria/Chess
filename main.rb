@@ -234,6 +234,7 @@ class Matchup
     puts 'while'
     move = ask_move(playerW)
     legalmove = is_move_valid?(move,'w')
+    
     legalmove = true
   end
   end
@@ -290,24 +291,37 @@ class Matchup
     # so...
 
     # identify movement
+    
     if sq_origin.x == sq_destiny.x 
       puts 'vertical'
       
+      #select all the squares of path        
+      sq_path = board.allsq.select { |sq| (sq.y < sq_destiny.y && sq.y > sq_origin.y) && sq.x == sq_origin.x }
+      #select if has somthing. if has => its an invalid move
+      sq_path.select { |sq| sq.content.label != 'e' }
+      
+      if ! sq_path.nil? 
+        return false
+      end
+
     elsif sq_origin.y == sq_destiny.y
       puts 'horizontal'
+      #select all the squares of path        
+      sq_path = board.allsq.select { |sq| (sq.x < sq_destiny.x && sq.x > sq_origin.x) && sq.y == sq_origin.y }
+      #select if has somthing. if has => its an invalid move
+      sq_path.select { |sq| sq.content.label != 'e' }
 
     elsif sq_origin.x.abs == sq_origin.y.abs && sq_destiny.x.abs == sq_destiny.y.abs
       puts 'diagonal'
-
+      #select all the squares of path        
+      sq_path = board.allsq.select { |sq| (sq.x == sq.y sq_destiny.x }
+      #select if has somthing. if has => its an invalid move
+      sq_path.select { |sq| sq.content.label != 'e' }
     else
       puts 'error on direction'
 
     end
     
-    
-    
-    
-
     p sq_origin
     p sq_destiny
   end
