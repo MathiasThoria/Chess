@@ -270,7 +270,7 @@ class Matchup
     
     sq_arr = nil
     # search destiny sq
-    sq_arr = board.allsq.select { |sq| sq.x == coordx  && sq.y == coordy }
+    sq_arr = board.allsq.select { |sq| sq.x == coordx && sq.y == coordy }
     if sq_arr.nil? 
       puts 'Destino no valido'
       return false
@@ -291,7 +291,7 @@ class Matchup
     # so...
 
     # identify movement
-    
+    sq_path = []
     if sq_origin.x == sq_destiny.x 
       puts 'vertical'
       
@@ -311,19 +311,29 @@ class Matchup
       #select if has somthing. if has => its an invalid move
       sq_path.select { |sq| sq.content.label != 'e' }
 
-    elsif sq_origin.x.abs == sq_origin.y.abs && sq_destiny.x.abs == sq_destiny.y.abs
+    else
       puts 'diagonal'
       #select all the squares of path        
-      sq_path = board.allsq.select { |sq| (sq.x == sq.y sq_destiny.x }
-      #select if has somthing. if has => its an invalid move
+      #sq_path = sq_path.clear()
+
+      dist = (sq_origin.x - sq_destiny.x).abs
+      p dist
+      for a in 1..dist
+        puts "a #{a} dist #{dist} sqpath #{sq_path}"
+        sq_path = sq_path.union( board.allsq.select { |sq| sq.x == sq_origin.x + a && sq.y == sq_origin.y + a} )
+        #p sq_path
+      end
+          #select if has somthing. if has => its an invalid move
+      puts "sqpath "
+      p sq_path
       sq_path.select { |sq| sq.content.label != 'e' }
-    else
-      puts 'error on direction'
+      
+      
 
     end
     
-    p sq_origin
-    p sq_destiny
+    #p sq_origin
+    #p sq_destiny
   end
 end
 
