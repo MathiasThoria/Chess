@@ -233,8 +233,16 @@ class Matchup
   while ! legalmove
     puts 'while'
     move = ask_move(playerW)
-    legalmove = is_move_valid?(move,'w')
     
+    # " the moment "
+    legalmove = is_move_valid?(move,'w')
+    #
+    if ! legalmove
+      puts "The move is invalid"
+    else
+      puts "The move is valid" 
+    end
+
     legalmove = true
   end
   end
@@ -253,33 +261,36 @@ class Matchup
     coordx = letter_to_x(move[3]).to_i
     coordy = move[4].to_i - 1
     
+    #easy limit check
     return false unless coordx >= 0 && coordx <= 8 
     return false unless coordy >= 0 && coordy <= 8 
     
     piecetomove = piecetomove.capitalize
     
     
-    #search origin sq by piece
-    sq_arr = board.allsq.select { |sq| sq.x == letter_to_x(piecerank) && sq.y == piecey && sq.content.label == piecetomove }
+    #search origin sq
+    sq_arr = board.allsq.select { |sq| sq.x == letter_to_x(piecerank) && sq.y == piecey }
+    
     if sq_arr.nil? 
-      puts 'Pieza origen no encontrada.'
+      puts 'Invalid origin Coordenate'
       return false
     else
       sq_origin = sq_arr[0]
     end
-    
+   
     sq_arr = nil
+
     # search destiny sq
     sq_arr = board.allsq.select { |sq| sq.x == coordx && sq.y == coordy }
+
     if sq_arr.nil? 
-      puts 'Destino no valido'
+      puts 'Invalid destiny coordinate'
       return false
     else
       sq_destiny = sq_arr[0]
     end
 
-    # destiny ocuppied?
-
+    
     # destiny in range?    
     puts "In range > #{sq_origin.content.legalmoves.include?([sq_destiny.x,sq_destiny.y])}"
 
@@ -328,10 +339,15 @@ class Matchup
       p sq_path
       sq_path.select { |sq| sq.content.label != 'e' }
       
-      
-
     end
     
+    # destiny ocuppied?
+    # if not colission and destiny is oposit team -> eat
+    # if not colission and destiny is same team -> invalid move
+
+    
+
+
     #p sq_origin
     #p sq_destiny
   end
