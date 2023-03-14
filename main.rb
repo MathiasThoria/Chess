@@ -236,11 +236,12 @@ class Matchup
     
     # " the moment "
     legalmove = is_move_valid?(move,'w')
-    #
-    if ! legalmove
-      puts "The move is invalid"
+    
+    # need to use formating of move. values as origin sq and destiny sq from is_move_valid?
+    if legalmove
+      puts "The move is valid"
     else
-      puts "The move is valid" 
+      puts "The move is invalid" 
     end
 
     legalmove = true
@@ -289,69 +290,82 @@ class Matchup
     else
       sq_destiny = sq_arr[0]
     end
-
-    
+   
     # destiny in range?    
     puts "In range > #{sq_origin.content.legalmoves.include?([sq_destiny.x,sq_destiny.y])}"
-
-    # colision?
-    # there are 3 types of movement: 
-    # horizontal -> y constant
-    # vertical -> x constant
-    # diagonal -> absolutes x = y
-    # so...
-
-    # identify movement
-    sq_path = []
-    if sq_origin.x == sq_destiny.x 
-      puts 'vertical'
-      
-      #select all the squares of path        
-      sq_path = board.allsq.select { |sq| (sq.y < sq_destiny.y && sq.y > sq_origin.y) && sq.x == sq_origin.x }
-      #select if has somthing. if has => its an invalid move
-      sq_path.select { |sq| sq.content.label != 'e' }
-      
-      if ! sq_path.nil? 
-        return false
-      end
-
-    elsif sq_origin.y == sq_destiny.y
-      puts 'horizontal'
-      #select all the squares of path        
-      sq_path = board.allsq.select { |sq| (sq.x < sq_destiny.x && sq.x > sq_origin.x) && sq.y == sq_origin.y }
-      #select if has somthing. if has => its an invalid move
-      sq_path.select { |sq| sq.content.label != 'e' }
-
-    else
-      puts 'diagonal'
-      #select all the squares of path        
-      #sq_path = sq_path.clear()
-
-      dist = (sq_origin.x - sq_destiny.x).abs
-      p dist
-      for a in 1..dist
-        puts "a #{a} dist #{dist} sqpath #{sq_path}"
-        sq_path = sq_path.union( board.allsq.select { |sq| sq.x == sq_origin.x + a && sq.y == sq_origin.y + a} )
-        #p sq_path
-      end
-          #select if has somthing. if has => its an invalid move
-      puts "sqpath "
-      p sq_path
-      sq_path.select { |sq| sq.content.label != 'e' }
-      
-    end
-    
-    # destiny ocuppied?
-    # if not colission and destiny is oposit team -> eat
-    # if not colission and destiny is same team -> invalid move
-
-    
-
+   
+    # if destiny is same team -> invalid move
+    if sq_destiny.content.color == turn
+      return false
+    end       
+    # if destiny is oposite team and not colission-> eat
+    # if not collission
+    if collision_in_path?(sq_origin, sq_destiny, board)  
+      return false   
+    end    
 
     #p sq_origin
     #p sq_destiny
   end
 end
+
+def collision_in_path?(sq_origin, sq_destiny, board)
+  # there are 3 types of movement: 
+  # horizontal -> y constant
+  # vertical -> x constant
+  # diagonal -> absolutes x = y
+  # so...
+
+  # identify movement
+  sq_path = []
+  if sq_origin.x == sq_destiny.x 
+    puts 'vertical'
+    
+    #select all the squares of path        
+    sq_path = board.allsq.select { |sq| (sq.y < sq_destiny.y && sq.y > sq_origin.y) && sq.x == sq_origin.x }
+    #select if has somthing. if has => its an invalid move
+    sq_path.select { |sq| sq.content.label != 'e' }
+    
+    if ! sq_path.nil? 
+      return false
+    end
+
+  elsif sq_origin.y == sq_destiny.y
+    puts 'horizontal'
+    #select all the squares of path        
+    sq_path = board.allsq.select { |sq| (sq.x < sq_destiny.x && sq.x > sq_origin.x) && sq.y == sq_origin.y }
+    #select if has somthing. if has => its an invalid move
+    sq_path.select { |sq| sq.content.label != 'e' }
+
+  else
+    puts 'diagonal'
+    #select all the squares of path        
+    #sq_path = sq_path.clear()
+
+    dist = (sq_origin.x - sq_destiny.x).abs
+    p dist
+    for a in 1..dist
+      puts "a #{a} dist #{dist} sqpath #{sq_path}"
+      sq_path = sq_path.union( board.allsq.select { |sq| sq.x == sq_origin.x + a && sq.y == sq_origin.y + a} )
+      #p sq_path
+    end
+    
+    puts "sqpath "
+    p sq_path
+    
+    #select if has somthing. if has => its an invalid move
+    sq_path.select { |sq| sq.content.label != 'e' }
+    if sq_path.nil? # has something else than 'e'?
+      return false 
+    else
+      return true # there is a colission
+    end  
+  end
+  
+
+end
+
+
 
 def letter_to_x(letter)
   letter = letter.capitalize unless letter.is_a? Integer
