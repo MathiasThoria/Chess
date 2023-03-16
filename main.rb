@@ -154,7 +154,7 @@ class SetOfPieces
   
   end
 
-  def id(name, team = nil)
+  def id(name, team = nil) # return id by name and team (optional)
     arr = @id.select{ |id| id.name == name && id.color == team } 
     return arr[0]
   end
@@ -174,6 +174,7 @@ class Pieces
     @name = name
     @color = team
     @eated = false
+    @team = team
     @label = name[0].capitalize
     set_legal_moves
   end
@@ -228,34 +229,36 @@ class Matchup
   end
 
   def start
-  legalmove = false
+    legalmove = false
+    check_mate = false
+    gave_up = false
 
-  while ! legalmove
-    puts 'while'
-    move = ask_move(playerW)
-    
-    # " the moment "
-    legalmove = is_move_valid?(move,'w')
-    
-    # need to use formating of move. values as origin sq and destiny sq from is_move_valid?
-    if legalmove
-      puts "The move is valid"
-    else
-      puts "The move is invalid" 
+    until check_mate || gave_up
+      while ! legalmove     
+       
+        move = ask_move(playerW, board) # returns an array with origin and destiny square 
+        
+        if is_move_valid?(move[0],move[1],'w')
+          puts "The move is valid"          
+          # change destiny
+          board.change_piece(move[1].x,move[1].y, move[0].content)
+          # change origin
+          board.change_piece(move[0].x,move[0].y, board.allpieces.id('e'))
+        else
+          puts "The move is invalid. Try again." 
+        end
+        legalmove = true
+      end
+
+      gave_up = true
     end
-
-    legalmove = true
-  end
   end
 
-  def ask_move(player)
+  def ask_move(player, board) # returns an array with 2 squares
     board.show_board
     puts "Player #{player}, please chose your move."
     move = gets.chomp
-    return move
-  end
 
-  def is_move_valid?(move,turn)    
     piecetomove = move[0]
     piecerank = letter_to_x(move[1]).to_i
     piecey = move[2].to_i - 1
@@ -266,8 +269,7 @@ class Matchup
     return false unless coordx >= 0 && coordx <= 8 
     return false unless coordy >= 0 && coordy <= 8 
     
-    piecetomove = piecetomove.capitalize
-    
+    piecetomove = piecetomove.capitalize    
     
     #search origin sq
     sq_arr = board.allsq.select { |sq| sq.x == letter_to_x(piecerank) && sq.y == piecey }
@@ -291,6 +293,13 @@ class Matchup
       sq_destiny = sq_arr[0]
     end
    
+    return [sq_origin, sq_destiny]
+   
+  end
+   
+  def is_move_valid?(sq_origin, sq_destiny,turn)    
+    puts "origin"
+    
     # destiny in range?    
     puts "In range > #{sq_origin.content.legalmoves.include?([sq_destiny.x,sq_destiny.y])}"
    
@@ -304,8 +313,7 @@ class Matchup
       return false   
     end    
 
-    #p sq_origin
-    #p sq_destiny
+    return true
   end
 end
 
@@ -318,50 +326,38 @@ def collision_in_path?(sq_origin, sq_destiny, board)
 
   # identify movement
   sq_path = []
+
   if sq_origin.x == sq_destiny.x 
-    puts 'vertical'
-    
+    puts 'vertical'    
     #select all the squares of path        
-    sq_path = board.allsq.select { |sq| (sq.y < sq_destiny.y && sq.y > sq_origin.y) && sq.x == sq_origin.x }
-    #select if has somthing. if has => its an invalid move
-    sq_path.select { |sq| sq.content.label != 'e' }
-    
-    if ! sq_path.nil? 
-      return false
-    end
+    sq_path = board.allsq.select { |sq| (sq.y < sq_destiny.y && sq.y > sq_origin.y) && sq.x == sq_origin.x }          
 
   elsif sq_origin.y == sq_destiny.y
     puts 'horizontal'
     #select all the squares of path        
-    sq_path = board.allsq.select { |sq| (sq.x < sq_destiny.x && sq.x > sq_origin.x) && sq.y == sq_origin.y }
-    #select if has somthing. if has => its an invalid move
-    sq_path.select { |sq| sq.content.label != 'e' }
+    sq_path = board.allsq.select { |sq| (sq.x < sq_destiny.x && sq.x > sq_origin.x) && sq.y == sq_origin.y }    
 
   else
     puts 'diagonal'
     #select all the squares of path        
-    #sq_path = sq_path.clear()
-
-    dist = (sq_origin.x - sq_destiny.x).abs
-    p dist
+    dist = (sq_origin.x - sq_destiny.x).abs    
     for a in 1..dist
       puts "a #{a} dist #{dist} sqpath #{sq_path}"
-      sq_path = sq_path.union( board.allsq.select { |sq| sq.x == sq_origin.x + a && sq.y == sq_origin.y + a} )
-      #p sq_path
-    end
-    
-    puts "sqpath "
-    p sq_path
-    
-    #select if has somthing. if has => its an invalid move
-    sq_path.select { |sq| sq.content.label != 'e' }
-    if sq_path.nil? # has something else than 'e'?
-      return false 
-    else
-      return true # there is a colission
-    end  
+      sq_path = sq_path.union( board.allsq.select { |sq| sq.x == sq_origin.x + a && sq.y == sq_origin.y + a} )      
+    end   
   end
-  
+
+  p "sqpath:"  
+  # if sq_path has some piece => its an invalid move
+  p sq_path    
+  sq_path.select { |sq| sq.content.label != 'e' }
+  if sq_path.empty?  # has something else than 'e'?      
+    puts "There are not pieces in the path."
+    return false 
+  else
+    puts "There is a colission."
+    return true # there is a colission
+  end   
 
 end
 
