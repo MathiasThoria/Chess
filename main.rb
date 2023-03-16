@@ -229,28 +229,45 @@ class Matchup
   end
 
   def start
-    legalmove = false
+    ilegalmove = true
     check_mate = false
-    gave_up = false
+    surrender = false
+    turn_player = playerW
+    turn_color = 'w'
 
-    until check_mate || gave_up
-      while ! legalmove     
-       
-        move = ask_move(playerW, board) # returns an array with origin and destiny square 
-        
-        if is_move_valid?(move[0],move[1],'w')
-          puts "The move is valid"          
-          # change destiny
-          board.change_piece(move[1].x,move[1].y, move[0].content)
-          # change origin
-          board.change_piece(move[0].x,move[0].y, board.allpieces.id('e'))
-        else
-          puts "The move is invalid. Try again." 
-        end
-        legalmove = true
+    puts "Player #{turn_player} moves."
+
+    until check_mate || surrender
+      turn_color = 'b' if turn_color == 'w'
+      turn_color = 'w' if turn_color == 'b'
+      turn_player = playerB if turn_player == playerW
+      turn_player = playerW if turn_player == playerB
+      
+      while ilegalmove && (! surrender)
+
+        move = ask_move(turn_player, board) # returns an array with origin and destiny square         
+        puts "move: #{move}"
+        if move == "surrender"
+          puts "You have surrender. Shaaaaame."
+          surrender = true
+        else            
+          if is_move_valid?(move[0],move[1], turn_color)
+            puts "The move is valid"          
+            # moving piece
+            # change destiny
+            board.change_piece(move[1].x,move[1].y, move[0].content)
+            # change origin
+            board.change_piece(move[0].x,move[0].y, board.allpieces.id('e'))
+
+            ilegalmove = false
+          else
+            puts "The move is invalid. Try again." 
+            ilegalmove = true
+          end
+        end  
       end
 
-      gave_up = true
+      
     end
   end
 
@@ -259,42 +276,42 @@ class Matchup
     puts "Player #{player}, please chose your move."
     move = gets.chomp
 
-    piecetomove = move[0]
-    piecerank = letter_to_x(move[1]).to_i
-    piecey = move[2].to_i - 1
-    coordx = letter_to_x(move[3]).to_i
-    coordy = move[4].to_i - 1
-    
-    #easy limit check
-    return false unless coordx >= 0 && coordx <= 8 
-    return false unless coordy >= 0 && coordy <= 8 
-    
-    piecetomove = piecetomove.capitalize    
-    
-    #search origin sq
-    sq_arr = board.allsq.select { |sq| sq.x == letter_to_x(piecerank) && sq.y == piecey }
-    
-    if sq_arr.nil? 
-      puts 'Invalid origin Coordenate'
-      return false
+    if move == "surrender"
+      return "surrender"
     else
-      sq_origin = sq_arr[0]
-    end
-   
-    sq_arr = nil
 
-    # search destiny sq
-    sq_arr = board.allsq.select { |sq| sq.x == coordx && sq.y == coordy }
+      piecetomove = move[0]
+      piecerank = letter_to_x(move[1]).to_i
+      piecey = move[2].to_i - 1
+      coordx = letter_to_x(move[3]).to_i
+      coordy = move[4].to_i - 1   
+      
+      piecetomove = piecetomove.capitalize    
+      
+      #search origin sq
+      sq_arr = board.allsq.select { |sq| sq.x == letter_to_x(piecerank) && sq.y == piecey }
+      
+      if sq_arr.nil? 
+        puts 'Invalid origin Coordenate'
+        return false
+      else
+        sq_origin = sq_arr[0]
+      end
+    
+      sq_arr = nil
 
-    if sq_arr.nil? 
-      puts 'Invalid destiny coordinate'
-      return false
-    else
-      sq_destiny = sq_arr[0]
+      # search destiny sq
+      sq_arr = board.allsq.select { |sq| sq.x == coordx && sq.y == coordy }
+
+      if sq_arr.nil? 
+        puts 'Invalid destiny coordinate'
+        return false
+      else
+        sq_destiny = sq_arr[0]
+      end
+    
+      return [sq_origin, sq_destiny]
     end
-   
-    return [sq_origin, sq_destiny]
-   
   end
    
   def is_move_valid?(sq_origin, sq_destiny,turn)    
@@ -346,11 +363,13 @@ def collision_in_path?(sq_origin, sq_destiny, board)
       sq_path = sq_path.union( board.allsq.select { |sq| sq.x == sq_origin.x + a && sq.y == sq_origin.y + a} )      
     end   
   end
-
-  p "sqpath:"  
+  
   # if sq_path has some piece => its an invalid move
-  p sq_path    
-  sq_path.select { |sq| sq.content.label != 'e' }
+  sq_path = sq_path.select { |sq| sq.content.name != 'e' }
+
+  #p "sqpath:"    
+  #p sq_path    
+
   if sq_path.empty?  # has something else than 'e'?      
     puts "There are not pieces in the path."
     return false 
@@ -389,7 +408,7 @@ end
 
 
 puts 'Init board'
-current_match = Matchup.new('Mathis','Otro')
+current_match = Matchup.new('Mathias','Otro')
 puts 'Starting Match.'
 current_match.start
 current_match.board.show_board
